@@ -1,2 +1,9 @@
 pac_data
 pac_data/
+.env/
+.ipynb_checkpoints/
+__pycache__/
+data/
+opencv/
+opencv_contrib/
+images/
