@@ -283,20 +283,21 @@ def evaluate_model_with_feed_dictionary(params, gpu_device, filenames_of_evaluat
                                                                                                                 current_step)
                     list_of_accuracies.append(accuracy_from_evaluation_step)
                 if params['max_steps'] == None or params['max_steps'] > max_num_steps_for_given_epoch:
-                    current_step += 1                                                                                          
-                    last_batch_of_preprocessed_evaluation_images = preprocessed_evaluation_images[(max_num_steps_for_given_epoch * params['batch_size']):]
-                    leftover = params['batch_size'] - (len(preprocessed_evaluation_images) - (max_num_steps_for_given_epoch * params['batch_size']))
-                    last_batch_of_preprocessed_evaluation_images.extend(preprocessed_evaluation_images[:leftover])
+                    if max_num_steps_for_given_epoch * params['batch_size'] < len(preprocessed_evaluation_images):
+                        current_step += 1                                                                                          
+                        last_batch_of_preprocessed_evaluation_images = preprocessed_evaluation_images[(max_num_steps_for_given_epoch * params['batch_size']):]
+                        leftover = params['batch_size'] - (len(preprocessed_evaluation_images) - (max_num_steps_for_given_epoch * params['batch_size']))
+                        last_batch_of_preprocessed_evaluation_images.extend(preprocessed_evaluation_images[:leftover])
 
-                    last_batch_of_labels_of_evaluation_images = labels_of_evaluation_images[(max_num_steps_for_given_epoch * params['batch_size']):]
-                    leftover = params['batch_size'] - (len(labels_of_evaluation_images) - (max_num_steps_for_given_epoch * params['batch_size']))
-                    last_batch_of_labels_of_evaluation_images.extend(labels_of_evaluation_images[:leftover])
-                    accuracy_from_evaluation_step = run_evaluation_step_for_predictions_with_feed_dictionary(params,
-                                                                                                                sess,
-                                                                                                                model,
-                                                                                                                last_batch_of_preprocessed_evaluation_images,
-                                                                                                                last_batch_of_labels_of_evaluation_images,
-                                                                                                                current_step)
+                        last_batch_of_labels_of_evaluation_images = labels_of_evaluation_images[(max_num_steps_for_given_epoch * params['batch_size']):]
+                        leftover = params['batch_size'] - (len(labels_of_evaluation_images) - (max_num_steps_for_given_epoch * params['batch_size']))
+                        last_batch_of_labels_of_evaluation_images.extend(labels_of_evaluation_images[:leftover])
+                        accuracy_from_evaluation_step = run_evaluation_step_for_predictions_with_feed_dictionary(params,
+                                                                                                                    sess,
+                                                                                                                    model,
+                                                                                                                    last_batch_of_preprocessed_evaluation_images,
+                                                                                                                    last_batch_of_labels_of_evaluation_images,
+                                                                                                                    current_step)
                     list_of_accuracies.append(accuracy_from_evaluation_step)
             if len(list_of_accuracies) > 0:
                 print("Average Accuracy Across Batches: %s " % statistics.mean(list_of_accuracies))
