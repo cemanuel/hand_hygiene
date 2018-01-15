@@ -35,66 +35,6 @@ git push -u origin master
 # Pushes the changes in your local repository up to the remote repository you specified as the origin
 
 
-# Creating Instances
-
-location of tensorflow: Quill-Data-Science/.env/lib/python3.5/site-packages/tensorflow
-
-gcloud compute instances start --project=assignment-2-165808 instance-1
-gcloud compute instances stop --project=assignment-2-165808 instance-1
-
-gcloud compute ssh --project=assignment-2-165808 instance-1
-
-source /home/cs231n/myVE35/bin/activate
-
-tensorboard --logdir=summaries
-
-# Copying Files
-
-gcloud compute scp --project=vibrant-grammar-164001 assignment3-instance:~/assignment3/images/data_to_transfer.zip ~/Desktop
-
-gcloud compute scp --project=assignment-2-165808 assignment3-instance:~/Quill-Data-Science.zip ~/Desktop
-
-gcloud compute scp --project=assignment-2-165808 ~/Documents/Summer\ 2017/quill/Quill-Data-Science.zip assignment3-instance:~
-
-gcloud compute scp --project=assignment-2-165808 ~/Documents/Summer\ 2017/quill/Quill-Data-Science/quill_grammar_detection_dataset.csv assignment3-instancce:~/Quil-Data-Science/quill-machine-translation
-
-gcloud compute scp --project=assignment-2-165808 ~/Desktop/data_to_transfer.zip assignment3-instance:~/assignment3/images
-
-gcloud compute scp --project=assignment-2-165808 assignment3-instance:~/Quill-Data-Science/quill-machine-translation/nlp_translation_with_sqe2sqe_languages-gpu.ipynb ~/Documents/Summer\ 2017/quill/Quill-Data-Science/quill-machine-translation
-
-gcloud compute scp --project=assignment-2-165808 assignment3-instance:~/Quill-Data-Science/quill-machine-translation/nlp_translations_with_sqe2sqe_grammar-gpu.ipynb ~/Documents/Summer\ 2017/quill/Quill-Data-Science/quill-machine-translation
-
-gcloud compute scp --project=assignment-2-165808 assignment3-instance:~/Quill-Data-Science-gcloud.zip ~/Documents
-
-gcloud compute scp --project=assignment-2-165808 assignment3-instance:~/Quill-Data-Science-gcloud.zip ~/Documents/backups
-
-gcloud compute scp --project=assignment-2-165808 assignment3-instance:~/Quill-Data-Science-gcloud.zip ~/Documents/backups
-
-gcloud compute scp --project=assignment-2-165808 assignment3-instance:~/nltk_data-gcloud.zip ~/Documents/backups
-
-gcloud compute scp --project=assignment-2-165808 assignment3-instance:~/assignment3-gcloud.zip ~/Documents/backups
-
-gcloud compute scp --project=assignment-2-165808 ~/Documents/Quill-Data-Science/google_cloud_work.zip instance-1:~/Quill-Data-Science
-
-gcloud compute scp --project=assignment-2-165808 ~/Documents/Quill-Data-Science/google_cloud_work/tensorflow-seq2seq-model-tutorial/translate/translate_with_assignment_of_devices.py instance-1:~/Quill-Data-Science/google_cloud_work/tensorflow-seq2seq-model-tutorial/translate
-
-gcloud compute scp --project=assignment-2-165808 ~/Documents/Quill-Data-Science/google_cloud_work/tensorflow-seq2seq-model-tutorial/translate/data_utils_with_mature_tokenizer_and_create_vocabulary_from_both_to_and_from.py instance-1:~/Quill-Data-Science/google_cloud_work/tensorflow-seq2seq-model-tutorial/translate
-
-gcloud compute scp --project=assignment-2-165808 ~/Documents/Quill-Data-Science/google_cloud_work/tensorflow-seq2seq-model-tutorial/translate/data_utils_for_grammar_correction.py instance-1:~/Quill-Data-Science/google_cloud_work/tensorflow-seq2seq-model-tutorial/translate
-
-gcloud compute scp --project=assignment-2-165808 ~/Documents/Quill-Data-Science/google_cloud_work/tensorflow-seq2seq-model-tutorial/translate/data/create_datasets_for_grammar_correction.py instance-1:~/Quill-Data-Science/google_cloud_work/tensorflow-seq2seq-model-tutorial/translate/data
-
-gcloud compute scp --project=assignment-2-165808 instance-1:~/Quill-Data-Science-backup-7-20-2017.zip ~/Documents
-
-gcloud compute scp --project=assignment-2-165808 instance-1:~/Quill-Data-Science-backup-second-time.zip ~/Documents
-
-gcloud compute scp --project=assignment-2-165808 instance-1:~/Quill-Data-Science/google_cloud_work/tensorflow-seq2seq-model-tutorial/translate/train/translate.ckpt-4000.data-00000-of-00001 ~/Documents/backups/testing_dividing_up_the_files
-
-python translate_for_grammar_correction.py --data_dir=data --train_dir=train --train_data=data/quill_grammar_correction_training_dataset.csv --dev_data=data/quill_grammar_correction_dev_dataset.csv --test_data=data/quill_grammar_correction_training_dataset.csv --from_vocab_size=40000 --to_vocab_size=40000 --stop_checkpoint=5000
-
-git filter-branch --index-filter 'git rm --cached --ignore-unmatch dumpfile.sql' merge-point..HEAD
-
-cd assignment1
 sudo pip install virtualenv      # This may already be installed
 virtualenv -p python3.5 .env       # Create a virtual environment (python3)
 # Note: you can also use "virtualenv .env" to use your default python (usually python 2.7)
@@ -103,36 +43,7 @@ pip install -r requirements.txt  # Install dependencies
 sudo pip3 install --upgrade https://storage.googleapis.com/tensorflow/mac/cpu/tensorflow-1.0.1-py3-none-any.whl
 pip install spacy
 pip install pandas
-python -m spacy download en
 mkdir logs
-mkdir train
-mkdir dev
-mkdir test
-# Work on the assignment for a while ...
-deactivate                       # Exit the virtual environment
-
-#!/bin/bash
-echo "Checking for CUDA and installing."
-# Check for CUDA and try to install.
-if ! dpkg-query -W cuda; then
-  # The 16.04 installer works with 16.10.
-  curl -O http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/cuda-repo-ubuntu1604_8.0.61-1_amd64.deb
-  dpkg -i ./cuda-repo-ubuntu1604_8.0.61-1_amd64.deb
-  apt-get update
-  apt-get install cuda -y
-fi
-
-#Make a file executable
-chmod u+x scriptname
-
-script -c 'python translate_for_grammar_correction.py --evaluate=True' | grep -v -E 'I tensorflow/|encoder\d+|decoder\d+|weight\d+'
-
-script -c 'python translate_for_grammar_correction.py --evaluate=True --data_dir=data --train_dir=train --test_data=data/quill_grammar_correction_testing_dataset.csv' | grep -E -v "I tensorflow/|encoder[0-9]+:|decoder[0-9]+:|weight[0-9]+:|model_with_buckets/|embedding_attention_seq2seq/|add|save/|MatMul|proj|transpose|init|Assign|Variable|mul|W tensorflow"
-
-sudo pip3 install --upgrade https://storage.googleapis.com/tensorflow/mac/cpu/tensorflow-1.0.1-py3-none-any.whl
-
-
-
 
 cmake -D CMAKE_BUILD_TYPE=RELEASE \
 	-D CMAKE_INSTALL_PREFIX=/usr/local \
