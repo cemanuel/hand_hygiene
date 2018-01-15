@@ -1,0 +1,5 @@
+model_checkpoint_path: "translate.ckpt-349"
+all_model_checkpoint_paths: "translate.ckpt-346"
+all_model_checkpoint_paths: "translate.ckpt-347"
+all_model_checkpoint_paths: "translate.ckpt-348"
+all_model_checkpoint_paths: "translate.ckpt-349"
