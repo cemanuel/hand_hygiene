@@ -115,6 +115,7 @@ def initialize_params(experiment_dir_name,
     params['dev_path'] = None
     params['testing_path'] = None
     params['forward_only'] = False
+    params['use_preprocessing'] = True
 
     params, filenames_of_images, labels_of_images = initialize_params_helper(params,
                                                                                 stage_of_development,
@@ -178,14 +179,23 @@ def run_evaluation_step_for_predictions_with_feed_dictionary(params,
                                                                 model,
                                                                 batched_filenames,
                                                                 batched_labels,
-                                                                current_step):
+                                                                current_step,
+                                                                filenames_of_correctly_labeled_images,
+                                                                filenames_of_incorrectly_labeled_images):
     predictions = model.step_with_dictionary(sess, batched_filenames, batched_labels)
     num_of_correct_predictions = 0
     numpy_predictions = np.array(predictions).astype(np.int32)
     numpy_real_labels = np.array(batched_labels).astype(np.int32)
+    list_of_predictions = list(numpy_predictions)
+    list_of_real_labels = list(numpy_real_labels)
+    for current_prediction, current_real_label, current_filename in zip(list_of_predictions, list_of_real_labels, batched_filenames):
+        if current_prediction != current_real_label:
+            filenames_of_incorrectly_labeled_images.append(current_filename)
+        else:
+            filenames_of_correctly_labeled_images.append(current_filename)
     num_of_correct_predictions += (numpy_predictions==numpy_real_labels).sum()
     print("Accuracy For Current Batch: %s " % ((num_of_correct_predictions * 1.0) / (len(predictions) * 1.0)))
-    return (num_of_correct_predictions * 1.0) / (len(predictions) * 1.0)
+    return ((num_of_correct_predictions * 1.0) / (len(predictions) * 1.0)), filenames_of_correctly_labeled_images, filenames_of_incorrectly_labeled_images
 
 def run_training_with_feed_dictionary(params, gpu_device, filenames_of_training_images, labels_of_training_images):
     with tf.Graph().as_default(), tf.device(gpu_device):
@@ -194,7 +204,11 @@ def run_training_with_feed_dictionary(params, gpu_device, filenames_of_training_
                 params['batch_size'] = len(filenames_of_training_images)
             model = create_model(sess, params)
             start_of_preprocessing = time.time()
-            preprocessed_training_images = data_utils.preprocess_images(filenames_of_training_images)
+            if params['use_preprocessing']:
+                print("Will use preprocessing")
+            else:
+                print("Will not use preprocessing")
+            preprocessed_training_images = data_utils.preprocess_images(params, filenames_of_training_images)
             end_of_preprocessing = time.time()
             print("Length of Time (in seconds) for preprocessing %s" % (end_of_preprocessing - start_of_preprocessing))
             step_time, loss = 0.0, 0.0
@@ -246,6 +260,8 @@ def run_training_with_feed_dictionary(params, gpu_device, filenames_of_training_
                                                                                                                 previous_losses)
 
 def evaluate_model_with_feed_dictionary(params, gpu_device, filenames_of_evaluation_images, labels_of_evaluation_images):
+    filenames_of_correctly_labeled_images = []
+    filenames_of_incorrectly_labeled_images = []
     with tf.Graph().as_default(), tf.device(gpu_device):
         with tf.Session(config=tf.ConfigProto(log_device_placement=False, allow_soft_placement=True)) as sess:
             # Create model.
@@ -254,7 +270,8 @@ def evaluate_model_with_feed_dictionary(params, gpu_device, filenames_of_evaluat
             model = create_model(sess, params)
             print("Done creating the model.")
             start_of_preprocessing = time.time()
-            preprocessed_evaluation_images = data_utils.preprocess_images(filenames_of_evaluation_images)
+            print(params['use_preprocessing'])
+            preprocessed_evaluation_images = data_utils.preprocess_images(params, filenames_of_evaluation_images)
             end_of_preprocessing = time.time()
             print("Length of Time (in seconds) for preprocessing %s" % (end_of_preprocessing - start_of_preprocessing))
             current_step = 0
@@ -275,12 +292,14 @@ def evaluate_model_with_feed_dictionary(params, gpu_device, filenames_of_evaluat
                     current_batch_of_preprocessed_evaluation_images = preprocessed_evaluation_images[timestep * params['batch_size']: (timestep+1)*params['batch_size']]
                     current_batch_of_labels_of_evaluation_images = labels_of_evaluation_images[timestep * params['batch_size']: (timestep+1)*params['batch_size']]
                     start_time_for_step = time.time()
-                    accuracy_from_evaluation_step = run_evaluation_step_for_predictions_with_feed_dictionary(params,
-                                                                                                                sess,
-                                                                                                                model,
-                                                                                                                current_batch_of_preprocessed_evaluation_images,
-                                                                                                                current_batch_of_labels_of_evaluation_images,
-                                                                                                                current_step)
+                    accuracy_from_evaluation_step, filenames_of_correctly_labeled_images, filenames_of_incorrectly_labeled_images  = run_evaluation_step_for_predictions_with_feed_dictionary(params,
+                                                                                                                                                                                                sess,
+                                                                                                                                                                                                model,
+                                                                                                                                                                                                current_batch_of_preprocessed_evaluation_images,
+                                                                                                                                                                                                current_batch_of_labels_of_evaluation_images,
+                                                                                                                                                                                                current_step,
+                                                                                                                                                                                                filenames_of_correctly_labeled_images,
+                                                                                                                                                                                                filenames_of_incorrectly_labeled_images)
                     list_of_accuracies.append(accuracy_from_evaluation_step)
                 if params['max_steps'] == None or params['max_steps'] > max_num_steps_for_given_epoch:
                     if max_num_steps_for_given_epoch * params['batch_size'] < len(preprocessed_evaluation_images):
@@ -292,16 +311,19 @@ def evaluate_model_with_feed_dictionary(params, gpu_device, filenames_of_evaluat
                         last_batch_of_labels_of_evaluation_images = labels_of_evaluation_images[(max_num_steps_for_given_epoch * params['batch_size']):]
                         leftover = params['batch_size'] - (len(labels_of_evaluation_images) - (max_num_steps_for_given_epoch * params['batch_size']))
                         last_batch_of_labels_of_evaluation_images.extend(labels_of_evaluation_images[:leftover])
-                        accuracy_from_evaluation_step = run_evaluation_step_for_predictions_with_feed_dictionary(params,
-                                                                                                                    sess,
-                                                                                                                    model,
-                                                                                                                    last_batch_of_preprocessed_evaluation_images,
-                                                                                                                    last_batch_of_labels_of_evaluation_images,
-                                                                                                                    current_step)
+                        accuracy_from_evaluation_step, filenames_of_correctly_labeled_images, filenames_of_incorrectly_labeled_images = run_evaluation_step_for_predictions_with_feed_dictionary(params,
+                                                                                                                                                                                                    sess,
+                                                                                                                                                                                                    model,
+                                                                                                                                                                                                    last_batch_of_preprocessed_evaluation_images,
+                                                                                                                                                                                                    last_batch_of_labels_of_evaluation_images,
+                                                                                                                                                                                                    current_step,
+                                                                                                                                                                                                    filenames_of_correctly_labeled_images,
+                                                                                                                                                                                                    filenames_of_incorrectly_labeled_images)
                     list_of_accuracies.append(accuracy_from_evaluation_step)
             if len(list_of_accuracies) > 0:
                 print("Average Accuracy Across Batches: %s " % statistics.mean(list_of_accuracies))
             else:
                 print("Not enough examples to evaluate model. Please have at least 1 example.")
+    return filenames_of_correctly_labeled_images, filenames_of_incorrectly_labeled_images
 
 

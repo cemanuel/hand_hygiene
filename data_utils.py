@@ -97,7 +97,7 @@ def find_experiment_name(experiment_dir_name, experiment_dir_suffix, directories
                         directories_that_match_pattern.append(f)
             else:
                 for f in os.listdir(directory_to_search_in):
-                    if re.match("\d{10}_experiment_\d\d\d\d-\d\d-\d\d_\d\d:\d\d:\d\d_" + experiment_dir_suffix, f):
+                    if re.match("\d{10}_experiment_\d\d\d\d-\d\d-\d\d_\d\d:\d\d:\d\d_" + experiment_dir_suffix + "$", f):
                         directories_that_match_pattern.append(f)
 
             if len(directories_that_match_pattern) == 0:
@@ -283,18 +283,21 @@ def interpolation_nearest_neighbor(data_matrix):
                 final_result[r][c] = data_matrix[newR][newC]
     return final_result
 
-def preprocess_images(filenames_of_images):
+def preprocess_images(params, filenames_of_images):
     processed_images = []
     for filename_of_image in filenames_of_images:
         data_from_filename = np.load(filename_of_image)
         img = data_from_filename['x'].astype(np.float32)
-        img_med = ndimage.median_filter(img, 4)
-        binary_mask_temp = img_med > 0.1
-        img_med[binary_mask_temp==0] = (np.sum(img_med) * 1.0) / (IMG_HEIGHT * 1.0  * IMG_WIDTH * 1.0)
-        img_med = ndimage.median_filter(img_med, 4)
-        thresh_min = threshold_otsu(img_med)
-        binary_min = img_med > thresh_min
-        img_med[binary_min==1] = 0 
-        processed_images.append(img_med)
+        if params['use_preprocessing']:
+            img_med = ndimage.median_filter(img, 4)
+            binary_mask_temp = img_med > 0.1
+            img_med[binary_mask_temp==0] = (np.sum(img_med) * 1.0) / (IMG_HEIGHT * 1.0  * IMG_WIDTH * 1.0)
+            img_med = ndimage.median_filter(img_med, 4)
+            thresh_min = threshold_otsu(img_med)
+            binary_min = img_med > thresh_min
+            img_med[binary_min==1] = 0 
+            processed_images.append(img_med)
+        else:
+            processed_images.append(img)
         end_time_for_preprocessing = time.time()
     return processed_images
