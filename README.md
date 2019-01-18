@@ -1,2 +1,16 @@
 # Overview
-Please see the document 'cortes_emanuel_sample_research_writeup.pdf' for an overview of the project.
+
+### Supervised Learning for Hand-Hygiene Binary Detection
+Due to the recent progress of cost-effective depth sensors, many tasks in smart hospitals have been automated through AI-assisted solutions. One of these tasks, automating hand-hygiene compliance, can be used to prevent hospital acquired infections. In this paper, convolutional networks (CNNs) are used to classify top-view depth images as “using dispenser” or “not using dispenser.” One model is trained per sensor.
+
+### WorkFlow
+
+
+
+### Results
+
+
+
+### Discussion
+Due to the recent progress of cost-effective depth sensors, many tasks in smart hospitals have been automated through AI-assisted solutions. One of these tasks, automating hand-hygiene compliance, can be used to prevent hospital acquired infections. In this paper, convolutional networks (CNNs) are used to classify top-view depth images as “using dispenser” or “not using dispenser.” One model is trained per sensor. 
+
