@@ -1,5 +1,0 @@
-model_checkpoint_path: "translate.ckpt-296"
-all_model_checkpoint_paths: "translate.ckpt-293"
-all_model_checkpoint_paths: "translate.ckpt-294"
-all_model_checkpoint_paths: "translate.ckpt-295"
-all_model_checkpoint_paths: "translate.ckpt-296"
