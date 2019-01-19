@@ -5,10 +5,11 @@ Due to the recent progress of cost-effective depth sensors, many tasks in smart 
 
 ### WorkFlow
 
+1.) Segmentation
+Otsu thresholding is used to separate the background from the objects in the foreground. One can view examples of these segmentation results, with threshold values, in the following notebook: viewing_processed_images.ipynb
 
-
-### Results
-
+2.) Classifiation
+These segmentations are fed to a convolutional neural network that is trained to output whether an image shows the activity of hand washing or not.
 
 
 ### Discussion
