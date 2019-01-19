@@ -5,6 +5,8 @@ Due to the recent progress of cost-effective depth sensors, many tasks in smart 
 
 ### WorkFlow
 
+![Alt Text](https://github.com/cemanuel/hand_hygiene/blob/master/workflow.png)
+
 1.) Segmentation
 Otsu thresholding is used to separate the background from the objects in the foreground. One can view examples of these segmentation results, with threshold values, in the following notebook: viewing_processed_images.ipynb
 
